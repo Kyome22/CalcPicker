@@ -3,63 +3,26 @@ import Observation
 
 @MainActor @Observable final class CalcPickerEngine {
     var rows: [Row]
+
     var requests: [Request] {
         didSet {
-            if requests.isEmpty || (requests.count == 1 && requests[0].isResult) {
-                rows[0].cells[0].role = .command(.allClear)
+            rows[0].cells[0].role = if requests.isAllClear {
+                .command(.allClear)
             } else {
-                rows[0].cells[0].role = .command(.delete)
+                .command(.delete)
             }
         }
     }
+
     var expression: String {
         if requests.isEmpty {
             "0"
         } else {
-            requests.map { request in
-                switch request {
-                case let .number(value):
-                    value.description
-                case .period:
-                    "."
-                case let .operator(value):
-                    value.description
-                case let .result(value):
-                    value.description
-                }
-            }
-            .joined()
+            requests.map(\.description).joined()
         }
     }
-    private var lastNomial: Nomial? {
-        let reversedRequest: [Request] = requests.reversed()
-        guard let index = reversedRequest.lastIndex(where: { $0.isNumber }) else {
-            return nil
-        }
-        if index + 1 < reversedRequest.count, reversedRequest[index + 1].isSubtractionOperator {
-            let startIndex = reversedRequest.count - 1 - (index + 1)
-            return Nomial(
-                index: startIndex,
-                requests: Array(requests[startIndex ..< requests.count])
-            )
-        } else {
-            let startIndex = reversedRequest.count - 1 - index
-            return Nomial(
-                index: startIndex,
-                requests: Array(requests[startIndex ..< requests.count])
-            )
-        }
-    }
-    private var lastOperators: [Operator] {
-        var operators = [Operator]()
-        if let request = requests.last, case let .operator(value) = request {
-            operators.append(value)
-            if let request = requests.dropLast().last, case let .operator(value) = request {
-                operators.append(value)
-            }
-        }
-        return operators
-    }
+
+    var handleDismiss: (() -> Void)?
 
     init() {
         rows = [
@@ -97,7 +60,7 @@ import Observation
         requests = []
     }
 
-    func onTap(_ cell: Row.Cell) {
+    func onTap(_ cell: Cell) {
         switch cell.role {
         case let .number(value):
             handle(number: value)
@@ -110,84 +73,103 @@ import Observation
         }
     }
 
-    private func handle(number value: Int) {
-        if let nominal = lastNomial {
-            if nominal.requests.count == 1, nominal.requests[0].isZero {
-                requests[nominal.index] = .number(value)
+    private func handle(number input: Int) {
+        if case var .term(value) = requests.last {
+            if value.isZero {
+                value.digits = [.number(input)]
             } else {
-                requests.append(.number(value))
+                value.digits.append(.number(input))
             }
-        } else if value != 0 {
-            requests.append(.number(value))
+            requests[requests.count - 1] = .term(value)
+        } else {
+            requests.append(.term(.init(digits: [.number(input)])))
         }
     }
 
     private func handlePeriod() {
-        if let nominal = lastNomial {
-            guard !nominal.requests.contains(where: { $0.isPeriod }) else {
+        if case var .term(value) = requests.last {
+            guard !value.digits.contains(.period) else {
                 return
             }
-            requests.append(.period)
+            value.digits.append(.period)
+            requests[requests.count - 1] = .term(value)
         } else {
-            requests.append(contentsOf: [.number(0), .period])
+            requests.append(.term(.init(digits: [.number(0), .period])))
         }
     }
 
-    private func handle(operator value: Operator) {
-        if let request = requests.last {
-            switch request {
-            case .number, .period:
-                requests.append(.operator(value))
-            case .operator:
-                switch lastOperators {
-                case [.addition], [.subtraction], [.modulus]:
-                    requests[requests.count - 1] = .operator(value)
-                case [.multiplication], [.division]:
-                    if value == .subtraction {
-                        requests.append(.operator(.subtraction))
-                    } else {
-                        requests[requests.count - 1] = .operator(value)
+    private func handle(operator input: Operator) {
+        switch requests.last {
+        case .term:
+            requests.append(.operator(input))
+        case let .operator(value):
+            switch value {
+            case .subtraction:
+                if requests.count == 1 {
+                    if input != .subtraction {
+                        requests.removeAll()
                     }
-                case [.multiplication, .subtraction], [.division, .subtraction]:
-                    break
-                 case [.modulus, .multiplication], [.modulus, .division]:
-                    break
-                default:
-                    break
+                } else if case let .operator(preValue) = requests.dropLast().last, [.multiplication, .division].contains(preValue) {
+                    requests.removeLast(2)
+                    requests.append(.operator(input))
+                } else if input != .subtraction {
+                    requests.removeLast()
+                    requests.append(.operator(input))
                 }
-            case .result:
-                break
+            case .modulus:
+                requests.append(.operator(input))
+            case .multiplication, .division:
+                if input != .subtraction {
+                    requests.removeLast()
+                }
+                requests.append(.operator(input))
+            default:
+                requests.removeLast()
+                requests.append(.operator(input))
             }
-        } else {
-            if value != .subtraction {
-                requests.append(.number(0))
+        case .none:
+            if input != .subtraction {
+                requests.append(.term(.init(digits: [.number(0)])))
             }
-            requests.append(.operator(value))
+            requests.append(.operator(input))
         }
     }
 
-    private func handle(command: Row.Cell.Role.Command) {
-        switch command {
+    private func handle(command input: Command) {
+        switch input {
         case .plusMinus:
-            if requests.count == 1, case let .result(value) = requests[0] {
-                requests = value.description.compactMap {
-                    switch $0 {
-                    case "-":
-                        Request.operator(.subtraction)
-                    case "0", "1", "2", "3", "4", "5", "6", "7":
-                        Request.number(Int($0.description)!)
-                    case ".":
-                        Request.period
-                    default:
-                        nil
+            guard case .term = requests.last else {
+                return
+            }
+            if requests.count == 1 {
+                requests.insert(.operator(.subtraction), at: 0)
+            } else if case let .operator(value) = requests.dropLast().last {
+                if case .term = requests.dropLast(2).last {
+                    switch value {
+                    case .addition:
+                        requests[requests.count - 2] = .operator(.subtraction)
+                    case .subtraction:
+                        requests[requests.count - 2] = .operator(.addition)
+                    case .multiplication, .division, .modulus:
+                        requests.insert(.operator(.subtraction), at: requests.count - 1)
                     }
-                }
-            } else {
-                guard let nominal = lastNomial else { return }
-                if nominal.requests[0].isSubtractionOperator {
-                    requests.remove(at: nominal.index)
-                } else {
-                    requests.insert(.operator(.subtraction), at: nominal.index)
+                } else if case let .operator(preValue) = requests.dropLast(2).last {
+                    switch (preValue, value) {
+                    case (.multiplication, .subtraction), (.division, .subtraction):
+                        requests.remove(at: requests.count - 2)
+                    case (.modulus, .addition):
+                        requests[requests.count - 2] = .operator(.subtraction)
+                    case (.modulus, .subtraction):
+                        requests[requests.count - 2] = .operator(.addition)
+                    case (.modulus, .multiplication), (.modulus, .division):
+                        requests.insert(.operator(.subtraction), at: requests.count - 1)
+                    default:
+                        break
+                    }
+                } else if value == .subtraction {
+                    requests.remove(at: requests.count - 2)
+                } else if value == .addition {
+                    requests[requests.count - 2] = .operator(.subtraction)
                 }
             }
         case .calculate:
@@ -195,14 +177,18 @@ import Observation
         case .allClear:
             requests.removeAll()
         case .delete:
-            requests.removeLast()
+            if case var .term(value) = requests.last {
+                value.digits.removeLast()
+                if value.digits.isEmpty {
+                    requests.removeLast()
+                } else {
+                    requests[requests.count - 1] = .term(value)
+                }
+            } else {
+                requests.removeLast()
+            }
         case .complete:
-            break
+            handleDismiss?()
         }
     }
-}
-
-private struct Nomial {
-    var index: Int
-    var requests: [Request]
 }

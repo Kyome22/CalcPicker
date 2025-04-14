@@ -13,7 +13,8 @@ struct ContentView: View {
     @State var isPresented = false
 
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
+            Spacer()
             Button {
                 isPresented.toggle()
             } label: {
@@ -22,7 +23,12 @@ struct ContentView: View {
             .calcPicker(value: $value, isPresented: $isPresented)
             Text(value.description)
         }
+        .frame(maxWidth: .infinity)
         .padding()
+        .background {
+            LinearGradient(colors: [.blue, .red], startPoint: .leading, endPoint: .trailing)
+                .ignoresSafeArea()
+        }
     }
 }
 

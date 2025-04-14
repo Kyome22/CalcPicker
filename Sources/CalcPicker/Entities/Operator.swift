@@ -1,3 +1,5 @@
+import SwiftUI
+
 enum Operator: CustomStringConvertible {
     case addition
     case subtraction
@@ -17,6 +19,21 @@ enum Operator: CustomStringConvertible {
             "÷"
         case .modulus:
             "%"
+        }
+    }
+
+    var image: Image {
+        switch self {
+        case .addition:
+            Image(systemName: "plus")
+        case .subtraction:
+            Image(systemName: "minus")
+        case .multiplication:
+            Image(systemName: "multiply")
+        case .division:
+            Image(systemName: "divide")
+        case .modulus:
+            Image(systemName: "percent")
         }
     }
 }
