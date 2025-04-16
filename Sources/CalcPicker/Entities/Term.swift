@@ -1,4 +1,6 @@
-struct Term: CustomStringConvertible {
+import Foundation
+
+struct Term: CustomStringConvertible, Equatable {
     var digits: [Digit]
     var isResult = false
 
@@ -6,15 +8,11 @@ struct Term: CustomStringConvertible {
         digits.map(\.description).joined()
     }
 
-    var isZero: Bool {
-        if digits.count == 1, case let .number(value) = digits.first, value == .zero {
-            true
-        } else {
-            false
-        }
+    var decimalValue: Decimal? {
+        Decimal(string: description)
     }
 
-    var doubleValue: Double? {
-        Double(description)
+    var isZero: Bool {
+        decimalValue?.isZero ?? false
     }
 }

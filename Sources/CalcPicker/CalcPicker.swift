@@ -20,7 +20,7 @@ public struct CalcPicker: View {
                 HStack {
                     ForEach(row.cells) { cell in
                         Button {
-                            engine.onTap(cell)
+                            engine.onTap(cell.role)
                         } label: {
                             Circle()
                                 .fill(cell.area.color)

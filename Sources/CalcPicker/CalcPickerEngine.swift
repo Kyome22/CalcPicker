@@ -60,8 +60,8 @@ import Observation
         requests = []
     }
 
-    func onTap(_ cell: Cell) {
-        switch cell.role {
+    func onTap(_ role: Role) {
+        switch role {
         case let .number(value):
             handle(number: value)
         case .period:
@@ -81,7 +81,7 @@ import Observation
                 value.digits.append(.number(input))
             }
             requests[requests.count - 1] = .term(value)
-        } else {
+        } else if input != .zero {
             requests.append(.term(.init(digits: [.number(input)])))
         }
     }
@@ -105,14 +105,20 @@ import Observation
         case let .operator(value):
             switch value {
             case .subtraction:
+                guard input != .subtraction else {
+                    return
+                }
                 if requests.count == 1 {
-                    if input != .subtraction {
-                        requests.removeAll()
-                    }
-                } else if case let .operator(preValue) = requests.dropLast().last, [.multiplication, .division].contains(preValue) {
+                    requests.removeAll()
+                } else if case .operator(.multiplication) = requests.dropLast().last {
                     requests.removeLast(2)
                     requests.append(.operator(input))
-                } else if input != .subtraction {
+                } else if case .operator(.division) = requests.dropLast().last {
+                    requests.removeLast(2)
+                    requests.append(.operator(input))
+                } else if case .operator(.modulus) = requests.dropLast().last, input == .modulus {
+                    requests.removeLast()
+                } else {
                     requests.removeLast()
                     requests.append(.operator(input))
                 }
@@ -164,7 +170,7 @@ import Observation
                     case (.modulus, .multiplication), (.modulus, .division):
                         requests.insert(.operator(.subtraction), at: requests.count - 1)
                     default:
-                        break
+                        return
                     }
                 } else if value == .subtraction {
                     requests.remove(at: requests.count - 2)
@@ -173,7 +179,10 @@ import Observation
                 }
             }
         case .calculate:
-            break
+            guard let result = try? requests.calculated() else {
+                return
+            }
+            requests = result
         case .allClear:
             requests.removeAll()
         case .delete:
