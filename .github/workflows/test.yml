@@ -31,5 +31,6 @@ jobs:
             -scheme Example \
             -only-testing:CalcPickerTests \
             -destination "platform=macOS,arch=arm64" \
-            -resultBundlePath TestResults/unit_test_result_bundle |\
+            -resultBundlePath TestResults/unit_test_result_bundle \
+            CODE_SIGNING_ALLOWED="NO" |\
             xcbeautify && exit ${PIPESTATUS[0]}
