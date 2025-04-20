@@ -4,8 +4,12 @@
 # Xcode
 xcuserdata/
 *.xcuserstate
+DerivedData/
 
 # Swift Package Manager
-Packages.resolved
+/*.xcodeproj
 .swiftpm/
 .build/
+
+# Test
+TestResults/

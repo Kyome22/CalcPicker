@@ -8,6 +8,9 @@ on:
     paths-ignore:
       - "**.md"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   unit-test:
     name: Unit Test
@@ -24,7 +27,9 @@ jobs:
       - name: Run Test
         run: |
           xcodebuild test \
-            -scheme CalcPicker \
+            -project Example/Example.xcodeproj \
+            -scheme Example \
+            -only-testing:CalcPickerTests \
             -destination "platform=macOS,arch=arm64" \
-            -resultBundlePath TestResults |\
-            xcpretty -c && exit ${PIPESTATUS[0]}
+            -resultBundlePath TestResults/unit_test_result_bundle |\
+            xcbeautify && exit ${PIPESTATUS[0]}

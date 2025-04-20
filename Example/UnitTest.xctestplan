@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "AF2AA740-ECAD-421F-8664-8944A349ADE4",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..",
+        "identifier" : "CalcPickerTests",
+        "name" : "CalcPickerTests"
+      }
+    }
+  ],
+  "version" : 1
+}
