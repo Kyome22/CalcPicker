@@ -20,6 +20,7 @@ struct ContentView: View {
             } label: {
                 Text("Open CalcPicker")
             }
+            .accessibilityIdentifier("openCalcPickerButton")
             .calcPicker(value: $value, isPresented: $isPresented)
             Text(value.description)
             Spacer()

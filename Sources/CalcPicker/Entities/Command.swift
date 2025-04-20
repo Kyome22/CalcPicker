@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum Command {
+enum Command: String {
     case plusMinus
     case calculate
     case allClear

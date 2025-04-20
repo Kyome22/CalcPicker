@@ -19,4 +19,17 @@ enum Role {
             value.body
         }
     }
+
+    var accessibilityIdentifier: String {
+        switch self {
+        case let .number(value):
+            "number\(value)Button"
+        case .period:
+            "periodButton"
+        case let .operator(value):
+            "\(value.rawValue)Button"
+        case let .command(value):
+            "\(value.rawValue)Button"
+        }
+    }
 }

@@ -58,16 +58,17 @@ public struct CalcPicker: View {
                                         .foregroundStyle(Color.white)
                                 }
                         }
+                        .accessibilityIdentifier(cell.role.accessibilityIdentifier)
                     }
                 }
             }
         }
         .padding(8)
         .fixedSize()
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("calcPicker")
         .onAppear {
             engine.handleDismiss = { dismiss() }
         }
     }
 }
-
-// 12.3 % 4 * 5 ± / 6 + 7 = close
