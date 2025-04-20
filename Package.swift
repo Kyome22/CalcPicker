@@ -6,6 +6,7 @@ let package = Package(
     name: "CalcPicker",
     platforms: [
       .iOS(.v17),
+      .macOS(.v15),
     ],
     products: [
         .library(

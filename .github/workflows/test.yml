@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**.md"
+
+jobs:
+  unit-test:
+    name: Unit Test
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode_16.3.app/Contents/Developer"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Run Test
+        run: |
+          xcodebuild test \
+            -scheme CalcPicker \
+            -destination "platform=macOS,arch=arm64" \
+            -resultBundlePath TestResults |\
+            xcpretty -c && exit ${PIPESTATUS[0]}
