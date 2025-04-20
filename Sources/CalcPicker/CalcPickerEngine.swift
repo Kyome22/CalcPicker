@@ -6,7 +6,7 @@ import Observation
 
     var requests: [Request] {
         didSet {
-            rows[0].cells[0].role = if requests.isAllClear {
+            rows[0].cells[0].role = if error != nil || requests.isAllClear {
                 .command(.allClear)
             } else {
                 .command(.delete)
@@ -15,7 +15,9 @@ import Observation
     }
 
     var expression: String {
-        if requests.isEmpty {
+        if let error {
+            error.localizedDescription
+        } else if requests.isEmpty {
             "0"
         } else {
             requests.map(\.description).joined()
@@ -23,6 +25,8 @@ import Observation
     }
 
     var handleDismiss: (() -> Void)?
+
+    var error: CalcPickerError?
 
     init() {
         rows = [
@@ -74,26 +78,32 @@ import Observation
     }
 
     private func handle(number input: Int) {
-        if case var .term(value) = requests.last {
-            if value.isZero {
+        switch requests.last {
+        case var .term(value):
+            if value.digits == [.number(0)] {
                 value.digits = [.number(input)]
             } else {
                 value.digits.append(.number(input))
             }
             requests[requests.count - 1] = .term(value)
-        } else if input != .zero {
+        case .operator:
             requests.append(.term(.init(digits: [.number(input)])))
+        case .none:
+            if input != .zero {
+                requests.append(.term(.init(digits: [.number(input)])))
+            }
         }
     }
 
     private func handlePeriod() {
-        if case var .term(value) = requests.last {
+        switch requests.last {
+        case var .term(value):
             guard !value.digits.contains(.period) else {
                 return
             }
             value.digits.append(.period)
             requests[requests.count - 1] = .term(value)
-        } else {
+        case .operator, .none:
             requests.append(.term(.init(digits: [.number(0), .period])))
         }
     }
@@ -104,33 +114,27 @@ import Observation
             requests.append(.operator(input))
         case let .operator(value):
             switch value {
+            case .addition:
+                requests.removeLast()
+                requests.append(.operator(input))
             case .subtraction:
                 guard input != .subtraction else {
                     return
                 }
-                if requests.count == 1 {
+                switch requests.dropLast().last {
+                case .term:
+                    requests.removeLast()
+                    requests.append(.operator(input))
+                case .operator:
+                    requests.removeLast(2)
+                    requests.append(.operator(input))
+                case .none:
                     requests.removeAll()
-                } else if case .operator(.multiplication) = requests.dropLast().last {
-                    requests.removeLast(2)
-                    requests.append(.operator(input))
-                } else if case .operator(.division) = requests.dropLast().last {
-                    requests.removeLast(2)
-                    requests.append(.operator(input))
-                } else if case .operator(.modulus) = requests.dropLast().last, input == .modulus {
-                    requests.removeLast()
-                } else {
-                    requests.removeLast()
-                    requests.append(.operator(input))
                 }
-            case .modulus:
-                requests.append(.operator(input))
-            case .multiplication, .division:
+            case .multiplication, .division, .modulus:
                 if input != .subtraction {
                     requests.removeLast()
                 }
-                requests.append(.operator(input))
-            default:
-                requests.removeLast()
                 requests.append(.operator(input))
             }
         case .none:
@@ -147,10 +151,12 @@ import Observation
             guard case .term = requests.last else {
                 return
             }
-            if requests.count == 1 {
-                requests.insert(.operator(.subtraction), at: 0)
-            } else if case let .operator(value) = requests.dropLast().last {
-                if case .term = requests.dropLast(2).last {
+            switch requests.dropLast().last {
+            case .term: // term term
+                fatalError("Error: There are two or more consecutive terms.")
+            case let .operator(value):
+                switch requests.dropLast(2).last {
+                case .term: // term operator term
                     switch value {
                     case .addition:
                         requests[requests.count - 2] = .operator(.subtraction)
@@ -159,42 +165,53 @@ import Observation
                     case .multiplication, .division, .modulus:
                         requests.insert(.operator(.subtraction), at: requests.count - 1)
                     }
-                } else if case let .operator(preValue) = requests.dropLast(2).last {
+                case let .operator(preValue): // operator operator term
                     switch (preValue, value) {
-                    case (.multiplication, .subtraction), (.division, .subtraction):
+                    case (.multiplication, .subtraction),
+                        (.division, .subtraction),
+                        (.modulus, .subtraction):
                         requests.remove(at: requests.count - 2)
-                    case (.modulus, .addition):
-                        requests[requests.count - 2] = .operator(.subtraction)
-                    case (.modulus, .subtraction):
-                        requests[requests.count - 2] = .operator(.addition)
-                    case (.modulus, .multiplication), (.modulus, .division):
-                        requests.insert(.operator(.subtraction), at: requests.count - 1)
                     default:
-                        return
+                        fatalError("Error: There are two or more consecutive operators.")
                     }
-                } else if value == .subtraction {
-                    requests.remove(at: requests.count - 2)
-                } else if value == .addition {
-                    requests[requests.count - 2] = .operator(.subtraction)
+                case .none: // operator term
+                    if value == .subtraction {
+                        requests.removeFirst()
+                    } else {
+                        requests.insert(.operator(.subtraction), at: 1)
+                    }
                 }
+            case .none: // term
+                requests.insert(.operator(.subtraction), at: 0)
             }
         case .calculate:
-            guard let result = try? requests.calculated() else {
-                return
+            do {
+                guard let result = try requests.calculated() else {
+                    return
+                }
+                requests = result
+            } catch let error as CalcPickerError {
+                self.error = error
+                requests.removeAll()
+            } catch {
+                fatalError("Error: \(error.localizedDescription)")
             }
-            requests = result
         case .allClear:
+            error = nil
             requests.removeAll()
         case .delete:
-            if case var .term(value) = requests.last {
+            switch requests.last {
+            case var .term(value):
                 value.digits.removeLast()
                 if value.digits.isEmpty {
                     requests.removeLast()
                 } else {
                     requests[requests.count - 1] = .term(value)
                 }
-            } else {
+            case .operator:
                 requests.removeLast()
+            case .none:
+                return
             }
         case .complete:
             handleDismiss?()

@@ -9,10 +9,12 @@ struct Term: CustomStringConvertible, Equatable {
     }
 
     var decimalValue: Decimal? {
-        Decimal(string: description)
-    }
-
-    var isZero: Bool {
-        decimalValue?.isZero ?? false
+        guard digits.filter({ $0 == .period }).count <= 1 else {
+            return nil
+        }
+        guard digits != [.period] else {
+            return nil
+        }
+        return Decimal(string: description)
     }
 }

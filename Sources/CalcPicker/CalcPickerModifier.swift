@@ -1,13 +1,13 @@
 import SwiftUI
 
 public struct CalcPickerModifier: ViewModifier {
-    @Binding var value: Double
+    @Binding var value: String
     @Binding var isPresented: Bool
     var attachmentAnchor: PopoverAttachmentAnchor
     var arrowEdge: Edge?
 
     public init(
-        value: Binding<Double>,
+        value: Binding<String>,
         isPresented: Binding<Bool>,
         attachmentAnchor: PopoverAttachmentAnchor = .rect(.bounds),
         arrowEdge: Edge? = nil
@@ -34,7 +34,7 @@ public struct CalcPickerModifier: ViewModifier {
 
 extension View {
     public func calcPicker(
-        value: Binding<Double>,
+        value: Binding<String>,
         isPresented: Binding<Bool>,
         attachmentAnchor: PopoverAttachmentAnchor = .rect(.bounds),
         arrowEdge: Edge? = nil

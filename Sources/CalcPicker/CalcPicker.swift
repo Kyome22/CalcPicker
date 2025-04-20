@@ -2,22 +2,49 @@ import SwiftUI
 
 public struct CalcPicker: View {
     @State private var engine = CalcPickerEngine()
-    @Binding private var value: Double
+    @State private var scrollPlace = ScrollPlace.fit
+    @Binding private var value: String
     @Environment(\.dismiss) private var dismiss
 
-    public init(value: Binding<Double>) {
+    public init(value: Binding<String>) {
         _value = value
     }
 
     public var body: some View {
-        VStack {
-            Text(engine.expression)
-                .font(.title)
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .foregroundStyle(Color.primary)
+        VStack(spacing: 8) {
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    Text(engine.expression)
+                        .font(.title)
+                        .fontWeight(.semibold)
+                        .fontDesign(.monospaced)
+                        .lineLimit(1)
+                        .foregroundStyle(Color.primary)
+                        .frame(minWidth: 184, alignment: .trailing) // 40*4+8*3
+                        .id("expression")
+                        .background {
+                            GeometryReader { proxy in
+                                Color.clear.preference(
+                                    key: ScrollPlacePreferenceKey.self,
+                                    value: ScrollPlace(width: 184, frame: proxy.frame(in: .named("scroll")))
+                                )
+                            }
+                        }
+                }
+                .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+                .frame(width: 184)
+                .mask(scrollPlace.mask)
+                .coordinateSpace(name: "scroll")
+                .onPreferenceChange(ScrollPlacePreferenceKey.self) { value in
+                    scrollPlace = value
+                }
+                .onChange(of: engine.expression) { _, newValue in
+                    value =  newValue
+                    proxy.scrollTo("expression", anchor: .trailing)
+                }
+            }
             ForEach(engine.rows) { row in
-                HStack {
+                HStack(spacing: 8) {
                     ForEach(row.cells) { cell in
                         Button {
                             engine.onTap(cell.role)
@@ -36,11 +63,11 @@ public struct CalcPicker: View {
             }
         }
         .padding(8)
+        .fixedSize()
         .onAppear {
             engine.handleDismiss = { dismiss() }
         }
-//        .onChange(of: engine.expression) { _, newValue in
-//            value = 
-//        }
     }
 }
+
+// 12.3 % 4 * 5 ± / 6 + 7 = close

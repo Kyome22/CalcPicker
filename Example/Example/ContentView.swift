@@ -9,7 +9,7 @@ import SwiftUI
 import CalcPicker
 
 struct ContentView: View {
-    @State var value: Double = .zero
+    @State var value: String = ""
     @State var isPresented = false
 
     var body: some View {
@@ -22,12 +22,17 @@ struct ContentView: View {
             }
             .calcPicker(value: $value, isPresented: $isPresented)
             Text(value.description)
+            Spacer()
         }
         .frame(maxWidth: .infinity)
         .padding()
         .background {
-            LinearGradient(colors: [.blue, .red], startPoint: .leading, endPoint: .trailing)
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: [.blue.opacity(0.3), .red.opacity(0.3)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .ignoresSafeArea()
         }
     }
 }
