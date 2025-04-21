@@ -38,6 +38,18 @@ extension [Request] {
         append(.term(.init(digits: [Digit](decimalValue: decimalValue.magnitude))))
     }
 
+    mutating func expired() {
+        self = map { request in
+            switch request {
+            case .operator:
+                return request
+            case var .term(value):
+                value.isResult = false
+                return Request.term(value)
+            }
+        }
+    }
+
     mutating func remove(at: Int, count: Int) {
         guard at + count <= self.count else {
             fatalError("Error: out of range")

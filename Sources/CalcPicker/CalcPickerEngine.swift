@@ -93,6 +93,7 @@ import Observation
                 requests.append(.term(.init(digits: [.number(input)])))
             }
         }
+        requests.expired()
     }
 
     private func handlePeriod() {
@@ -106,6 +107,7 @@ import Observation
         case .operator, .none:
             requests.append(.term(.init(digits: [.number(0), .period])))
         }
+        requests.expired()
     }
 
     private func handle(operator input: Operator) {
@@ -143,6 +145,7 @@ import Observation
             }
             requests.append(.operator(input))
         }
+        requests.expired()
     }
 
     private func handle(command input: Command) {
@@ -184,6 +187,7 @@ import Observation
             case .none: // term
                 requests.insert(.operator(.subtraction), at: 0)
             }
+            requests.expired()
         case .calculate:
             do {
                 guard let result = try requests.calculated() else {
