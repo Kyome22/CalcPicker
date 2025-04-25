@@ -16,7 +16,7 @@ jobs:
     name: Unit Test
     runs-on: macos-15
     env:
-      DEVELOPER_DIR: "/Applications/Xcode_16.3.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode_16.2.app/Contents/Developer"
 
     steps:
       - uses: actions/checkout@v4
@@ -27,10 +27,7 @@ jobs:
       - name: Run Test
         run: |
           xcodebuild test \
-            -project Example/Example.xcodeproj \
-            -scheme Example \
-            -only-testing:CalcPickerTests \
+            -scheme CalcPicker \
             -destination "platform=macOS,arch=arm64" \
-            -resultBundlePath TestResults/unit_test_result_bundle \
-            CODE_SIGNING_ALLOWED="NO" |\
+            -resultBundlePath TestResults/unit_test_result_bundle | \
             xcbeautify && exit ${PIPESTATUS[0]}
