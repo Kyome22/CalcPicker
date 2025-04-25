@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		185B9D192D9E892A00461B95 /* CalcPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 185B9D182D9E892A00461B95 /* CalcPicker */; };
-		1C3B8D812DB551C400AF3012 /* UnitTest.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 1C3B8D802DB551C400AF3012 /* UnitTest.xctestplan */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,7 +24,6 @@
 		185B9D082D9E88B100461B95 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		185B9D162D9E891F00461B95 /* CalcPicker */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = CalcPicker; path = ..; sourceTree = "<group>"; };
 		1C0F44392DB539140062B368 /* ExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1C3B8D802DB551C400AF3012 /* UnitTest.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = UnitTest.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -63,7 +61,6 @@
 		185B9CFF2D9E88B100461B95 = {
 			isa = PBXGroup;
 			children = (
-				1C3B8D802DB551C400AF3012 /* UnitTest.xctestplan */,
 				185B9D162D9E891F00461B95 /* CalcPicker */,
 				185B9D0A2D9E88B100461B95 /* Example */,
 				1C0F443A2DB539140062B368 /* ExampleUITests */,
@@ -181,7 +178,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C3B8D812DB551C400AF3012 /* UnitTest.xctestplan in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
