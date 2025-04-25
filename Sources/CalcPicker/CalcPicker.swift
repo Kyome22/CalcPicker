@@ -36,7 +36,9 @@ public struct CalcPicker: View {
                 .mask(scrollPlace.mask)
                 .coordinateSpace(name: "scroll")
                 .onPreferenceChange(ScrollPlacePreferenceKey.self) { value in
-                    scrollPlace = value
+                    MainActor.assumeIsolated {
+                        scrollPlace = value
+                    }
                 }
                 .onChange(of: engine.expression) { _, newValue in
                     value =  newValue
