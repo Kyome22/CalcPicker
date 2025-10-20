@@ -6,9 +6,9 @@ Calculator Picker for iOS using SwiftUI.
 
 ## Requirements
 
-- Development with Xcode 16.2+
-- Written in Swift 6.0
-- Compatible with iOS 17.0+
+- Development with Xcode 16.4+
+- Written in Swift 6.1
+- Compatible with iOS 18.0+
 
 ## Usage
 

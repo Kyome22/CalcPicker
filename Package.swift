@@ -1,11 +1,15 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 
 import PackageDescription
+
+let swiftSettings: [SwiftSetting] = [
+    .enableUpcomingFeature("ExistentialAny"),
+]
 
 let package = Package(
     name: "CalcPicker",
     platforms: [
-      .iOS(.v17),
+      .iOS(.v18),
       .macOS(.v15),
     ],
     products: [
@@ -17,12 +21,12 @@ let package = Package(
     targets: [
         .target(
             name: "CalcPicker",
-            swiftSettings: [.enableUpcomingFeature("ExistentialAny")]
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "CalcPickerTests",
             dependencies: ["CalcPicker"],
-            swiftSettings: [.enableUpcomingFeature("ExistentialAny")]
+            swiftSettings: swiftSettings
         ),
     ]
 )
