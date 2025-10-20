@@ -15,6 +15,7 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 20) {
             Spacer()
+            Text(value.isEmpty ? " " : value)
             Button {
                 isPresented.toggle()
             } label: {
@@ -22,7 +23,6 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("openCalcPickerButton")
             .calcPicker(value: $value, isPresented: $isPresented, arrowEdge: .top)
-            Text(value.isEmpty ? " " : value)
             Spacer()
         }
         .frame(maxWidth: .infinity)
@@ -35,6 +35,8 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("contentView")
     }
 }
 
