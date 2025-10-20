@@ -3,8 +3,7 @@ import SwiftUI
 public struct CalcPicker: View {
     @State private var engine = CalcPickerEngine()
     @State private var scrollPlace = ScrollPlace.fit
-    @Binding private var value: String
-    @Environment(\.dismiss) private var dismiss
+    @Binding var value: String
 
     public init(value: Binding<String>) {
         _value = value
@@ -69,8 +68,5 @@ public struct CalcPicker: View {
         .fixedSize()
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("calcPicker")
-        .onAppear {
-            engine.handleDismiss = { dismiss() }
-        }
     }
 }

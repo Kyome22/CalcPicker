@@ -2,7 +2,6 @@ import Foundation
 
 struct Term: CustomStringConvertible, Equatable {
     var digits: [Digit]
-    var isResult = false
 
     var description: String {
         digits.map(\.description).joined()

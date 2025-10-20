@@ -5,66 +5,28 @@ import Testing
 struct RequestTests {
     @Test(arguments: [
         .init(
-            requests: [.term(.init(1, isResult: true))],
-            expectedIsResult: true
+            requests: [.term(.init(1))],
+            expectedIsClear: true
         ),
         .init(
-            requests: [.term(.init(1, isResult: false))],
-            expectedIsResult: false
+            requests: [.operator(.subtraction), .term(.init(1))],
+            expectedIsClear: true
         ),
         .init(
-            requests: [.operator(.subtraction), .term(.init(1, isResult: true))],
-            expectedIsResult: true
-        ),
-        .init(
-            requests: [.operator(.subtraction), .term(.init(1, isResult: false))],
-            expectedIsResult: false
+            requests: [.operator(.subtraction)],
+            expectedIsClear: false
         ),
         .init(
             requests: [.term(.init(1)), .operator(.addition)],
-            expectedIsResult: false
+            expectedIsClear: false
         ),
         .init(
             requests: [.term(.init(1)), .operator(.addition), .term(.init(1))],
-            expectedIsResult: false
+            expectedIsClear: true
         ),
-    ] as [IsResultCondition])
-    func isResult(_ condition: IsResultCondition) {
-        #expect(condition.requests.isResult == condition.expectedIsResult)
-    }
-
-    @Test(arguments: [
-        .init(
-            requests: [],
-            expectedIsAllClear: true
-        ),
-        .init(
-            requests: [.term(.init(1, isResult: true))],
-            expectedIsAllClear: true
-        ),
-        .init(
-            requests: [.term(.init(1, isResult: false))],
-            expectedIsAllClear: false
-        ),
-        .init(
-            requests: [.operator(.subtraction), .term(.init(1, isResult: true))],
-            expectedIsAllClear: true
-        ),
-        .init(
-            requests: [.operator(.subtraction), .term(.init(1, isResult: false))],
-            expectedIsAllClear: false
-        ),
-        .init(
-            requests: [.term(.init(1)), .operator(.addition)],
-            expectedIsAllClear: false
-        ),
-        .init(
-            requests: [.term(.init(1)), .operator(.addition), .term(.init(1))],
-            expectedIsAllClear: false
-        ),
-    ] as [IsAllClearCondition])
-    func isAllClear(_ condition: IsAllClearCondition) {
-        #expect(condition.requests.isAllClear == condition.expectedIsAllClear)
+    ] as [IsClearCondition])
+    func isClear(_ condition: IsClearCondition) {
+        #expect(condition.requests.isClear == condition.expectedIsClear)
     }
 
     @Test(arguments: [
@@ -238,39 +200,39 @@ struct RequestTests {
         ),
         .init(
             requests: [.term(.init(1)), .operator(.addition), .term(.init(1))],
-            expectedRequests: [.term(.init(2, isResult: true))]
+            expectedRequests: [.term(.init(2))]
         ),
         .init(
             requests: [.term(.init(1)), .operator(.subtraction), .term(.init(1))],
-            expectedRequests: [.term(.init(0, isResult: true))]
+            expectedRequests: [.term(.init(0))]
         ),
         .init(
             requests: [.term(.init(2)), .operator(.multiplication), .term(.init(3))],
-            expectedRequests: [.term(.init(6, isResult: true))]
+            expectedRequests: [.term(.init(6))]
         ),
         .init(
             requests: [.term(.init(6)), .operator(.division), .term(.init(3))],
-            expectedRequests: [.term(.init(2, isResult: true))]
+            expectedRequests: [.term(.init(2))]
         ),
         .init(
             requests: [.term(.init(3)), .operator(.modulus), .term(.init(2))],
-            expectedRequests: [.term(.init(1, isResult: true))]
+            expectedRequests: [.term(.init(1))]
         ),
         .init(
             requests: [.term(.init(3.5)), .operator(.modulus), .term(.init(2))],
-            expectedRequests: [.term(.init(1.5, isResult: true))]
+            expectedRequests: [.term(.init(1.5))]
         ),
         .init(
             requests: [.operator(.subtraction), .term(.init(3.5)), .operator(.modulus), .term(.init(2))],
-            expectedRequests: [.term(.init(0.5, isResult: true))]
+            expectedRequests: [.term(.init(0.5))]
         ),
         .init(
             requests: [.term(.init(3.5)), .operator(.modulus), .operator(.subtraction), .term(.init(2))],
-            expectedRequests: [.operator(.subtraction), .term(.init(0.5, isResult: true))]
+            expectedRequests: [.operator(.subtraction), .term(.init(0.5))]
         ),
         .init(
             requests: [.operator(.subtraction), .term(.init(3.5)), .operator(.modulus), .operator(.subtraction), .term(.init(2))],
-            expectedRequests: [.operator(.subtraction), .term(.init(1.5, isResult: true))]
+            expectedRequests: [.operator(.subtraction), .term(.init(1.5))]
         ),
     ] as [CalculatedCondition])
     func calculated_simple_expression(_ condition: CalculatedCondition) throws {
@@ -297,23 +259,23 @@ struct RequestTests {
     @Test(arguments: [
         .init(
             requests: [.term(.init(1)), .operator(.addition), .term(.init(1)), .operator(.addition), .term(.init(1)), .operator(.addition), .term(.init(1))],
-            expectedRequests: [.term(.init(4, isResult: true))]
+            expectedRequests: [.term(.init(4))]
         ),
         .init(
             requests: [.term(.init(1)), .operator(.subtraction), .term(.init(1)), .operator(.subtraction), .term(.init(1)), .operator(.subtraction), .term(.init(1))],
-            expectedRequests: [.operator(.subtraction), .term(.init(2, isResult: true))]
+            expectedRequests: [.operator(.subtraction), .term(.init(2))]
         ),
         .init(
             requests: [.term(.init(2)), .operator(.multiplication), .term(.init(3)), .operator(.multiplication), .term(.init(4)), .operator(.multiplication), .term(.init(5))],
-            expectedRequests: [.term(.init(120, isResult: true))]
+            expectedRequests: [.term(.init(120))]
         ),
         .init(
             requests: [.term(.init(300)), .operator(.division), .term(.init(10)), .operator(.division), .term(.init(5)), .operator(.division), .term(.init(2))],
-            expectedRequests: [.term(.init(3, isResult: true))]
+            expectedRequests: [.term(.init(3))]
         ),
         .init(
             requests: [.term(.init(80)), .operator(.modulus), .term(.init(50)), .operator(.modulus), .term(.init(20)), .operator(.modulus), .term(.init(3))],
-            expectedRequests: [.term(.init(1, isResult: true))]
+            expectedRequests: [.term(.init(1))]
         ),
     ] as [CalculatedCondition])
     func calculated_easy_expression(_ condition: CalculatedCondition) throws {
@@ -336,7 +298,7 @@ struct RequestTests {
                 .operator(.addition),
                 .term(.init(2))
             ],
-            expectedRequests: [.term(.init(22, isResult: true))]
+            expectedRequests: [.term(.init(22))]
         ),
         .init(
             requests: [
@@ -352,7 +314,7 @@ struct RequestTests {
                 .operator(.addition),
                 .term(.init(2))
             ],
-            expectedRequests: [.term(.init(0, isResult: true))]
+            expectedRequests: [.term(.init(0))]
         ),
     ] as [CalculatedCondition])
     func calculated_complicated_expression(_ condition: CalculatedCondition) throws {
@@ -361,14 +323,9 @@ struct RequestTests {
     }
 }
 
-struct IsResultCondition {
+struct IsClearCondition {
     var requests: [Request]
-    var expectedIsResult: Bool
-}
-
-struct IsAllClearCondition {
-    var requests: [Request]
-    var expectedIsAllClear: Bool
+    var expectedIsClear: Bool
 }
 
 struct RequestsCondition {

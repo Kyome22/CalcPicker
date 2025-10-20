@@ -11,7 +11,7 @@ extension [Digit] {
 }
 
 extension Term {
-    init(_ doubleValue: Double, isResult: Bool = false) {
-        self.init(digits: [Digit](doubleValue: doubleValue), isResult: isResult)
+    init(_ doubleValue: Double) {
+        self.init(digits: [Digit](doubleValue: doubleValue))
     }
 }

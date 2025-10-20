@@ -15,18 +15,12 @@ enum Request: CustomStringConvertible, Equatable {
 }
 
 extension [Request] {
-    var isResult: Bool {
-        if count == 1, case let .term(value) = first, value.isResult {
-            true
-        } else if count == 2, case .operator(.subtraction) = first, case let .term(value) = last, value.isResult {
+    var isClear: Bool {
+        if case .term = last {
             true
         } else {
             false
         }
-    }
-
-    var isAllClear: Bool {
-        isEmpty || isResult
     }
 
     init(decimalValue: Decimal) {
@@ -42,10 +36,9 @@ extension [Request] {
         self = map { request in
             switch request {
             case .operator:
-                return request
-            case var .term(value):
-                value.isResult = false
-                return Request.term(value)
+                request
+            case let .term(value):
+                Request.term(value)
             }
         }
     }
@@ -145,9 +138,9 @@ extension [Request] {
         }
 
         if copy.count == 1, case let .term(value) = copy.first {
-            return [.term(.init(digits: value.digits, isResult: true))]
+            return [.term(.init(digits: value.digits))]
         } else if copy.count == 2, case .operator(.subtraction) = copy.first, case let .term(value) = copy.last {
-            return [.operator(.subtraction), .term(.init(digits: value.digits, isResult: true))]
+            return [.operator(.subtraction), .term(.init(digits: value.digits))]
         } else {
             throw CalcPickerError.undefined
         }

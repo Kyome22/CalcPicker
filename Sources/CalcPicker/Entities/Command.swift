@@ -4,8 +4,8 @@ enum Command: String {
     case plusMinus
     case calculate
     case allClear
+    case clear
     case delete
-    case complete
 
     @ViewBuilder
     var body: some View {
@@ -16,10 +16,10 @@ enum Command: String {
             Image(systemName: "equal")
         case .allClear:
             Text(verbatim: "AC")
+        case .clear:
+            Text(verbatim: "C")
         case .delete:
             Image(systemName: "delete.backward")
-        case .complete:
-            Image(systemName: "text.append")
         }
     }
 }

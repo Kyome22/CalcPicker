@@ -879,7 +879,7 @@ struct CalcPickerEngineTests {
         let sut = CalcPickerEngine()
         sut.requests = [.term(.init(1)), .operator(.multiplication), .operator(.subtraction), .term(.init(1))]
         sut.onTap(.command(.calculate))
-        #expect(sut.requests == [.operator(.subtraction), .term(.init(1, isResult: true))])
+        #expect(sut.requests == [.operator(.subtraction), .term(.init(1))])
         #expect(sut.expression == "-1")
     }
 
@@ -900,6 +900,29 @@ struct CalcPickerEngineTests {
         sut.onTap(.command(.allClear))
         #expect(sut.requests.isEmpty)
         #expect(sut.expression == "0")
+    }
+
+    @Test(arguments: [
+        .init(
+            role: .command(.clear),
+            premiseRequests: [.term(.init(0))],
+            expectedRequests: [],
+            expectedExpression: "0"
+        ),
+        .init(
+            role: .command(.clear),
+            premiseRequests: [.operator(.subtraction), .term(.init(1))],
+            expectedRequests: [.operator(.subtraction)],
+            expectedExpression: "-"
+        ),
+    ] as [OnTapCondition])
+    @MainActor
+    func onTap_clear(_ condition: OnTapCondition) {
+        let sut = CalcPickerEngine()
+        sut.requests = condition.premiseRequests
+        sut.onTap(condition.role)
+        #expect(sut.requests == condition.expectedRequests)
+        #expect(sut.expression == condition.expectedExpression)
     }
 
     @Test(arguments: [

@@ -6,10 +6,10 @@ import Observation
 
     var requests: [Request] {
         didSet {
-            rows[0].cells[0].role = if error != nil || requests.isAllClear {
-                .command(.allClear)
+            rows[0].cells[1].role = if error == nil, requests.isClear {
+                .command(.clear)
             } else {
-                .command(.delete)
+                .command(.allClear)
             }
         }
     }
@@ -24,15 +24,13 @@ import Observation
         }
     }
 
-    var handleDismiss: (() -> Void)?
-
     var error: CalcPickerError?
 
     init() {
         rows = [
             Row(cells: [
+                .init(area: .upperSide, role: .command(.delete)),
                 .init(area: .upperSide, role: .command(.allClear)),
-                .init(area: .upperSide, role: .command(.plusMinus)),
                 .init(area: .upperSide, role: .operator(.modulus)),
                 .init(area: .rightSide, role: .operator(.division)),
             ]),
@@ -55,7 +53,7 @@ import Observation
                 .init(area: .rightSide, role: .operator(.addition)),
             ]),
             Row(cells: [
-                .init(area: .main, role: .command(.complete)),
+                .init(area: .main, role: .command(.plusMinus)),
                 .init(area: .main, role: .number(0)),
                 .init(area: .main, role: .period),
                 .init(area: .rightSide, role: .command(.calculate)),
@@ -203,6 +201,10 @@ import Observation
         case .allClear:
             error = nil
             requests.removeAll()
+        case .clear:
+            if case .term = requests.last {
+                requests.removeLast()
+            }
         case .delete:
             switch requests.last {
             case var .term(value):
@@ -217,8 +219,6 @@ import Observation
             case .none:
                 return
             }
-        case .complete:
-            handleDismiss?()
         }
     }
 }
