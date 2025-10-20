@@ -30,7 +30,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:UnitTest.xctestplan"
+            reference = "container:CalcPicker.xctestplan"
             default = "YES">
          </TestPlanReference>
       </TestPlans>

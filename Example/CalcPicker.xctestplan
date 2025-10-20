@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "A07E3410-3286-44B5-AC08-F199148909AF",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Example.xcodeproj",
+        "identifier" : "1C0F44382DB539140062B368",
+        "name" : "ExampleUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..",
+        "identifier" : "CalcPickerTests",
+        "name" : "CalcPickerTests"
+      }
+    }
+  ],
+  "version" : 1
+}
