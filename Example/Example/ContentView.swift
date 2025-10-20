@@ -21,7 +21,7 @@ struct ContentView: View {
                 Text("Open CalcPicker")
             }
             .accessibilityIdentifier("openCalcPickerButton")
-            .calcPicker(value: $value, isPresented: $isPresented)
+            .calcPicker(value: $value, isPresented: $isPresented, arrowEdge: .top)
             Text(value.isEmpty ? " " : value)
             Spacer()
         }
